@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Code;
+use App\Models\FamilyMember;
 use App\Models\HealthRecord;
 use Carbon\Carbon;
 use \Exception;
@@ -117,7 +119,9 @@ class RecordController extends Controller
             $record = HealthRecord::where('record_type', $recordType)
             ->orderBy('recorded_at', 'asc') // Sort in ascending order
             ->get();
-        if($record->isEmpty()){
+            $date = $record->pluck('recorded_at')->toArray();
+            $value = $record->pluck('value')->toArray();
+        if(empty($date || $value)){
             return response()->json([
                 'message'=>'no record found',
                 'error' => 'data not found'
@@ -125,8 +129,53 @@ class RecordController extends Controller
         }
         return response()->json([
             'message' => 'record found successfully',
-            'data' => $record
+            'data' => $date,
+            'value' => $value
+
         ]);
         }
+
+
+public function generateCode(Request $request){
+    $user = Auth::user();
+    $randomCode = rand(100000,999999);
+    Code::create([
+        'user_id' => $user->id,
+        'code' => $randomCode,
+        'expires_at'=> Carbon::now()->addMinute(5)
+    ]);
+    return response()->json([
+               'message' => 'code generated successfully',
+               'code'=> $randomCode
+
+    ]);
 }
+        // add family member with their respected relation to the user
+        public function addFamilyMember(Request $request){
+            $user = Auth::user();
+            $relation = $request->input('relation');
+            $code = $request->input('code');
+            // if the user code is equal to the code of the user_id in the code table
+            // if the code is eequal to the code in code table then add the user to the family members
+            if(Code::where('code', $code)->get()){
+                // get relation_id from the code table
+                $relation_id = Code::where('code',$code)->firstOrFail()->user_id;
+                
+                // delete the code from code table 
+                Code::where('code', $code)->delete();
+                // add the user to the family members
+                FamilyMember::create([
+                    'user_id' => $user->id,
+                    'relation' => $relation,
+                    'relation_id' => $relation_id
+                    ]);
+                    return response()->json([
+                        'message' => 'family member added successfully',
+                        'relation' => $relation
+                        ]);
+            }
+        
+        }
+    
+    }
 

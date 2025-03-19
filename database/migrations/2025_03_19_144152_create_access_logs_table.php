@@ -12,15 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
-        Schema::create('healthRecords', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('access_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('record_id')->constrained('health_records')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('record_type');
-            $table->integer('value')->nullable();
-            $table->string('file_path')->nullable();
-            $table->timestamp('recorded_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamps();
+            $table->timestamp('access_time')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamps(0);
         });
     }
 
@@ -29,7 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
-        Schema::dropIfExists('healthrecords');
+        Schema::dropIfExists('access_logs');
     }
 };
