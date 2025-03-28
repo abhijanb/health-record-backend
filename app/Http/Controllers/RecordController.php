@@ -37,38 +37,37 @@ class RecordController extends Controller
     }
     
     public function store(Request $request){
-        // return response()->json([
-        //     "hello"=>"back",
-        //     'file' => $request->file('file_path')
-
-        // ]);
+       
         $data = Validator::make($request->all(),[
             'record_type'=>'required',
-            'file_path' => $request->hasFile('file_path') ? 'image|mimes:jpeg,png,jpg' : 'nullable',
-            'value'=>'nullable',
+            'record_details'=>'required',
+            'record_file'=>$request->hasFile('file_path') ? 'image|mimes:jpeg,png,jpg' : 'nullable',
+            
+            'visibility'=>'required',   
+            'value'=>'required|numeric'
             
         ]);
-        $recorded_at = Carbon::now();
         if($data->fails()){
             return response()->json([
                 'message' => 'validation error',
                 'error' => $data->errors(),
-                'file' => $request->input('record_type')
             ],422);
         }
         $imageName = null;
-        if($request->hasFile('file_path')){
-            $imageName = time().'.'.$request->file('file_path')->getClientOriginalExtension();
+        if($request->hasFile('record_file')){
+            $imageName = time().'.'.$request->file('record_file')->getClientOriginalExtension();
             
-            $request->file('file_path')->move(public_path("public"),$imageName);
+            $request->file('record_file')->move(public_path("public"),$imageName);
          
         }
          HealthRecord::create([
-            'user_id' => Auth::user()->id,
-            'record_type'=>$request->input('record_type',null),
-            'file_path'=>$imageName,
-            'value'=>$request->input('value',null),
-            'recorded_at' => $recorded_at,
+            'user_id' => "1",
+            'record_type'=>$request->input('record_type'),
+            'record_details'=>$request->input('record_details'),
+            'record_file'=>$request->input('record_file'),
+            'date_recorded'=>Carbon::now(),
+            'visibility'=>$request->input('visibility'),
+            'value'=>$request->input('value')
         ]);
       return response()->json([
         'message'=> 'health record stored successfully',
