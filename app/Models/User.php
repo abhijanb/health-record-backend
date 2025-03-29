@@ -52,4 +52,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function healthRecord(){
+        return $this->hasMany(HealthRecord::class);
+    }
 }

@@ -9,6 +9,7 @@ class HealthRecord extends Model
     //
     protected $fillable = [
         'user_id',
+        "name",
        
             "record_type",
             "record_details",
@@ -18,4 +19,8 @@ class HealthRecord extends Model
 "value"          
           
     ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

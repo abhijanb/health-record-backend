@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('health_records', function (Blueprint $table) {
-            $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        Schema::create('health_record_history', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
         $table->string('name')->required();
+        $table->decimal('value', 8, 2)->nullable();
+        $table->enum('visibility', ['public_all', 'public_connected', 'private'])->default('private');
+        $table->string('record_file', 255)->nullable();
         $table->enum('record_type', ['file', 'text', 'report']);
         $table->text('record_details');
-        $table->string('record_file', 255)->nullable();
-        $table->date('date_recorded');
-        $table->enum('visibility', ['public_all', 'public_connected', 'private'])->default('private');
-        $table->decimal('value');
-        $table->timestamps();
+        $table->timestamp('changed_at');
         });
     }
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('health_records');
+        Schema::dropIfExists('health_record_history');
     }
 };

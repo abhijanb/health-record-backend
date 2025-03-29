@@ -29,7 +29,7 @@ class UserController extends Controller
             'gender' => 'required|in:male,female,other',
             'phone_number' => 'required|string|max:15|regex:/^\+?[0-9]{7,15}$/',
             'address' => 'required|string|max:500',
-            'avator' => 'required|string|max:255',
+            'avatar' => 'required|string|max:255',
         ]);
 
         if ($validata->fails()) {
@@ -102,5 +102,62 @@ class UserController extends Controller
             'message' => 'logout failed',
 
         ], 401);
+    }
+
+    // update profile
+    public function updateProfile(Request $request){
+        $user = Auth::user();
+        $validator = Validator::make($request->all(),[
+            'name'=>'string|max:255|nullable',
+            'dob' => 'date|nullable',
+            'phone_number' => 'string|max:15|regex:/^\+?[0-9]{7,15}$/|nullable',
+            'address' => 'string|max:500|nullable',
+            'avatar' => 'string|max:255|nullable',
+        ]);
+        if($validator->fails()){
+            return response()->json([
+                'message' => 'validation error',
+                'error' => $validator->errors(),
+            ],422);
+        }
+        $user->update([
+            'name' => $request->input('name') ?? $user->name,
+            'date_of_birth' => $request->input('dob') ?? $user->date_of_birth,
+            'phone_number' => $request->input('phone_number') ?? $user->phone_number,
+            'address' => $request->input('address') ?? $user->address,
+            'avatar' => $request->input('avatar') ?? $user->avatar,
+        ]);
+        return response()->json([
+            'message' => 'profile updated successfully',
+            'data' => $user,
+        ], 200);
+
+    }
+
+    // change password
+    public function changePassword(Request  $request){
+        $user = Auth::user();
+        $validator = Validator::make($request->all(),[
+            'old_password'=>'required|string',
+            'new_password'=>'required|string|min:8',
+        ]);
+        if($validator->fails()){
+            return response()->json([
+                'message' => 'validation error',
+                'error' => $validator->errors(),
+            ],422);
+        }
+        if(!password_verify($request->input('old_password'),$user->password)){
+            return response()->json([
+                'message' => 'old password is incorrect',
+            ],422);
+        }
+        $user->update([
+            'password' => bcrypt($request->input('new_password')),
+        ]);
+        return response()->json([
+            'message' => 'password changed successfully',
+        ], 200);
+
     }
 }

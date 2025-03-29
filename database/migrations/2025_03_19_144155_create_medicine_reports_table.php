@@ -20,7 +20,6 @@ return new class extends Migration
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->decimal('price', 10, 2)->nullable();
-            $table->string('doctor_name')->nullable();
             $table->string('store_name');
             $table->string('prescription')->nullable();
             $table->timestamps(0); // Creates 'created_at' and 'updated_at' columns
